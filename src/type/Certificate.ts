@@ -1,4 +1,4 @@
-export interface Certificate {
+export interface ICertificate {
     id: number;
     commonName: string;
     issuingCA: string;
@@ -7,15 +7,6 @@ export interface Certificate {
     validTo: string;
     serialNumber: string;
     sans: string[];
+    ip: string;
 }
 
-/**
- *     private Long id;
- *     private String commonName;
- *     private String issuingCA;
- *     private String organization;
- *     private Instant validFrom;
- *     private Instant validTo;
- *     private String serialNumber;
- *     private List<String> sans;
- */

@@ -1,5 +1,4 @@
 // src/components/Header.tsx
-import { FiChevronDown } from "react-icons/fi";
 import styled from "styled-components";
 
 const Header: React.FC = () => {

@@ -1,20 +1,11 @@
 import axios from 'axios';
 
-// baseURL: 'http://localhost:8000/',
 export const api = axios.create({
     baseURL: 'http://localhost:8080/',
-    // headers: localStorage.getItem('usr') ? {
-    //     'Content-Type': 'application/json',
-    //     // 'authorization': 'Bearer ' + (JSON.parse(localStorage.getItem('usr') as string) as User).token
-    // } : {
-    //     'Content-Type': 'application/json',
-    // },
     headers: {
         'Content-Type': 'application/json',
     }
 });
-
-
 
 // api.interceptors.request.use((config) => {
 //     const savedUser = localStorage.getItem('usr');
