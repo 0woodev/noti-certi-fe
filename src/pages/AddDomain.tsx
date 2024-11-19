@@ -79,7 +79,7 @@ const AddDomain = () => {
                 return;
             }
             const saveDomainRes = await saveDomain(host, ip!, port);
-            savedDomain = saveDomainRes.data.data;
+            savedDomain = saveDomainRes.data;
             setDomain(savedDomain);
         }
 
@@ -135,7 +135,7 @@ const AddDomain = () => {
                     ) : (
                         <NotManaged>이 인증서는 관리되고 있지 않습니다 :(</NotManaged>
                     )}
-                    {(domain && managedCertificate) ? (
+                    {(domain && managedCertificate && domain.certificateId === managedCertificate.id) ? (
                         <button onClick={handleNavigateDomainDetailButtonClick}>도메인 정보 보러가기</button>
                     ) : (
                         <button onClick={handleNavigateCertificateNewButtonClick}>인증서 저장하러 가기</button>

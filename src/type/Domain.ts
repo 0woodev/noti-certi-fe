@@ -11,6 +11,6 @@ export interface IDomain {
     host: string;
     ip: string;
     port: string;
-    certificateId?: number;
+    certificateId: number | null;
 }
 

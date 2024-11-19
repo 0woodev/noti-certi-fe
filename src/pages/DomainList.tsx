@@ -43,7 +43,10 @@ const DomainList = () => {
 
             <DomainListContainer>
                 {domains.map((domain) => (
-                    <Domain onClick={() => handleDomainClick(domain.id)}>
+                    <Domain
+                        $valid={domain.certificateId ? "T" : "F"}
+                        onClick={() => handleDomainClick(domain.id)}
+                    >
                         <Info>
                             <Label>도메인 주소</Label><Value>{domain.host}</Value>
                         </Info>
@@ -114,13 +117,15 @@ const DomainListContainer = styled.div`
     height: 100%;
 `;
 
-const Domain = styled.div`
-    border: 1px solid black;
+const Domain = styled.div<{ $valid: string }>`
+    border: 2px solid ${props => props.$valid === "T" ? "green" : "red"};
     padding: 10px;
     margin: 0.5rem 0;
     border-radius: 0.5rem;
     width: 100%;
     hieght: 10rem;
+    
+    
 `;
 
 const Info = styled.div`

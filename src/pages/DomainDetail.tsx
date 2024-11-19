@@ -4,7 +4,7 @@ import {useEffect, useState} from "react";
 import {getDomainById} from "../api/Domain";
 import {IDomain} from "../type/Domain";
 import {ICertificate} from "../type/Certificate";
-import {getManagedCertificateById} from "../api/Certificate";
+import {connectDomainAndCert, getManagedCertificateById} from "../api/Certificate";
 import styled from "styled-components";
 
 
@@ -32,6 +32,9 @@ const DomainDetail = () => {
 
     useEffect(() => {
         if (domain !== null) {
+            if (!domain.certificateId) {
+                return;
+            }
             const certificateId = domain.certificateId;
             getManagedCertificateById(certificateId!)
                 .then((res) => {
@@ -40,6 +43,27 @@ const DomainDetail = () => {
                 })
         }
     }, [domain]);
+
+    const getCertificate = async () => {
+        if (domain === null) return;
+
+        try {
+            if (domain.certificateId === null) {
+                const connectedRes = await connectDomainAndCert(domain.id);
+                const { certificate } = connectedRes.data;
+
+                setCertificate(certificate);
+            } else {
+                const managedRes = await getManagedCertificateById(domain.certificateId);
+                const certificate = managedRes.data;
+
+                setCertificate(certificate);
+            }
+
+        } catch (error) {
+            alert("인증서 조회에 실패했습니다.")
+        }
+    }
 
     return (
         <PageLayout>
