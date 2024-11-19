@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import CertificateNew from "./pages/DomainDetail";
 import DomainDetail from "./pages/DomainDetail";
 import DomainList from "./pages/DomainList";
+import AppList from "./pages/AppList";
 
 
 const BaseRouter = () => {
@@ -13,7 +14,7 @@ const BaseRouter = () => {
             <Route path="/domain" element={<DomainList />} />
             <Route path="/domain/:id" element={<DomainDetail />} />
             <Route path="/certificate/new" element={<CertificateNew />} />
-
+            <Route path="/app" element={<AppList />} />
         </Routes>
     );
 }
