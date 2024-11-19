@@ -19,3 +19,13 @@ export const saveApp = async (name: string, code: string, description: string) =
         throw error;
     }
 }
+
+export const getAppById = async (id: number) => {
+    try {
+        let getAppRes = await api.get(`/app/${id}`);
+
+        return getAppRes.data;
+    } catch (error) {
+        throw error;
+    }
+}

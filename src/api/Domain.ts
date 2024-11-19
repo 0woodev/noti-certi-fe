@@ -46,3 +46,12 @@ export const searchDomain = async (host?: string) => {
         throw error;
     }
 }
+
+export const findAllDomainsByAppId = async (appId: number) => {
+    try {
+        const response = await api.get(`/domain/app/${appId}`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}

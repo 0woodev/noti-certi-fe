@@ -22,7 +22,6 @@ const ViewWrapper = styled.div`
     width: 100vw;
     display: flex;
     flex-direction: column;
-    position: relative;
 `;
 
 const Content = styled.main`
@@ -32,6 +31,7 @@ const Content = styled.main`
     width: 100%;
     min-height: calc(100vh - 50px);
     border: 1px solid black;
+    position: relative;
 `;
 
 export default Layout;

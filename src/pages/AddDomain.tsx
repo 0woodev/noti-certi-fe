@@ -7,7 +7,7 @@ import {IDomain} from "../type/Domain";
 import {getDomainByIpAndPort, getDomainIp, saveDomain} from "../api/Domain";
 
 
-const Home = () => {
+const AddDomain = () => {
     const navigate = useNavigate();
     const [host, setHost] = useState<string>("");
     const [port, setPort] = useState<number>(443);
@@ -224,4 +224,4 @@ const CertificateJson = styled.textarea`
     height: 30rem;
 `;
 
-export default Home;
+export default AddDomain;
