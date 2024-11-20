@@ -16,6 +16,15 @@ interface IDomainTableProps {
     selected: boolean[];
     setSelected: (selected: boolean[]) => void;
 }
+
+enum CertificateStatus {
+    EXPIRED = 0,
+    RED = 1,
+    YELLOW= 2,
+    GREEN = 3,
+    NONE=4
+}
+
 const DomainTable = ({ domains, newDomainButtonHide, intro, refresh, selected, setSelected, selectable }: IDomainTableProps) => {
     const navigate = useNavigate();
 
@@ -41,13 +50,17 @@ const DomainTable = ({ domains, newDomainButtonHide, intro, refresh, selected, s
         setModalOn(true);
     }
 
-    const getLight = (status: number) => {
-        if (status === 0) {
-            return <NotManaged />;
-        } else if (status === 1) {
-            return <Warning />;
+    const getLight = (status: CertificateStatus) => {
+        if (status === CertificateStatus.EXPIRED) {
+            return <BlackLight />;
+        } else if (status === CertificateStatus.RED) {
+            return <RedLight />;
+        } else if (status === CertificateStatus.YELLOW) {
+            return <YellowRight />;
+        } else if (status === CertificateStatus.GREEN) {
+            return <GreenLight />;
         } else {
-            return <Managed />;
+            return <></>;
         }
     }
 
@@ -79,11 +92,11 @@ const DomainTable = ({ domains, newDomainButtonHide, intro, refresh, selected, s
                 <List>
                     {domains.map((domain, i) => {
                         let statusMessage = "";
-                        let status = 2;
+                        let status: CertificateStatus = CertificateStatus.GREEN;
                         let dDay = 0;
                         if (!domain.certificate) {
                             statusMessage = "-";
-                            status = 0;
+                            status = CertificateStatus.NONE;
                         }
 
                         if (domain.certificate) {
@@ -94,11 +107,14 @@ const DomainTable = ({ domains, newDomainButtonHide, intro, refresh, selected, s
                                 status = 0;
                             } else {
                                 dDay = Math.floor((expiredAt.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-                                // if (expiredAt.getTime() < new Date().getTime()) {
-                                if (expiredAt.getTime() - new Date().getTime() < 1000 * 60 * 60 * 24 * 120) { // TODO 위의 조건문으로
-                                    status = 0;
-                                } else if (expiredAt.getTime() - new Date().getTime() < 1000 * 60 * 60 * 24 * 200) { // TODO 200 -> 30
-                                    status = 1;
+                                if (expiredAt.getTime() < new Date().getTime()) {
+                                    status = CertificateStatus.EXPIRED;
+                                } else if (expiredAt.getTime() - new Date().getTime() < 1000 * 60 * 60 * 24 * 30) {
+                                    status = CertificateStatus.RED;
+                                } else  if (expiredAt.getTime() - new Date().getTime() < 1000 * 60 * 60 * 24 * 60) {
+                                    status = CertificateStatus.YELLOW;
+                                } else {
+                                    status = CertificateStatus.GREEN;
                                 }
                                 statusMessage = dDay + "일 남음";
                             }
@@ -165,15 +181,19 @@ const Light = styled.p`
     border-radius: 50%;
     margin-right: 0.5rem;
 `;
-const Managed = styled(Light)`
+const GreenLight = styled(Light)`
     background: green;
 `;
 
-const NotManaged = styled(Light)`
+const BlackLight = styled(Light)`
+    background: black;
+`;
+
+const RedLight = styled(Light)`
     background: red;
 `;
 
-const Warning = styled(Light)`
+const YellowRight = styled(Light)`
     background: yellow;
 `;
 
