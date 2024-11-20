@@ -1,19 +1,19 @@
 import React, {useState} from "react";
 import styled from "styled-components";
-import {ICertificate} from "../type/Certificate";
-import {getLiveCertificate, findManagedCertificate, connectDomainAndCert} from "../api/Certificate";
+import {ICertificate} from "../../type/Certificate";
+import {getLiveCertificate, findManagedCertificate, connectDomainAndCert} from "../../api/Certificate";
 import {useNavigate} from "react-router-dom";
-import {IDomain} from "../type/Domain";
-import {getDomainByIpAndPort, getDomainIp, saveDomain} from "../api/Domain";
-import AppTable from "../components/app/AppTable";
-import {IApp} from "../type/App";
+import {IDomain} from "../../type/Domain";
+import {getDomainByIpAndPort, getDomainIp, saveDomain} from "../../api/Domain";
+import AppTable from "../app/AppTable";
+import {IApp} from "../../type/App";
 import {
     connectAppsToDomain,
     disconnectAppsToDomain,
     getAppsByDomainId,
     getAppsByExcludeDomainId,
     searchApp
-} from "../api/App";
+} from "../../api/App";
 
 
 interface AddDomainProps {
