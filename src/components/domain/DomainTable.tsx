@@ -41,6 +41,15 @@ const DomainTable = ({ domains, newDomainButtonHide, intro, refresh, selected, s
         setModalOn(true);
     }
 
+    const getLight = (status: number) => {
+        if (status === 0) {
+            return <NotManaged />;
+        } else if (status === 1) {
+            return <Warning />;
+        } else {
+            return <Managed />;
+        }
+    }
 
     return (
         <>
@@ -87,7 +96,7 @@ const DomainTable = ({ domains, newDomainButtonHide, intro, refresh, selected, s
                                 dDay = Math.floor((expiredAt.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
                                 if (expiredAt.getTime() < new Date().getTime()) {
                                     status = 0;
-                                } else if (expiredAt.getTime() - new Date().getTime() < 1000 * 60 * 60 * 24 * 30) {
+                                } else if (expiredAt.getTime() - new Date().getTime() < 1000 * 60 * 60 * 24 * 150) {
                                     status = 1;
                                 }
                                 statusMessage = dDay + "일 남음";
@@ -110,11 +119,10 @@ const DomainTable = ({ domains, newDomainButtonHide, intro, refresh, selected, s
                                     <Value>{domain.port}</Value>
                                 </Info>
                                 <Info>
-                                    {status ? (
-                                        <Managed>{statusMessage}</Managed>
-                                    ) : (
-                                        <NotManaged>{statusMessage}</NotManaged>
-                                    )}
+                                    <Status>
+                                        {getLight(status)}
+                                        <DDay>{statusMessage}</DDay>
+                                    </Status>
                                 </Info>
                             </Domain>
                         )
@@ -137,12 +145,35 @@ const DomainTable = ({ domains, newDomainButtonHide, intro, refresh, selected, s
     );
 }
 
-const Managed = styled.div`
-    color: green;
+const Status = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 1rem;
 `;
 
-const NotManaged = styled.div`
-    color: red;
+const DDay = styled.p`
+    width: 5rem;
+`;
+
+const Light = styled.p`
+    border: 1px solid gray;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+`;
+const Managed = styled(Light)`
+    background: green;
+`;
+
+const NotManaged = styled(Light)`
+    background: red;
+`;
+
+const Warning = styled(Light)`
+    background: yellow;
 `;
 
 const AddDomainModal = styled.div`
