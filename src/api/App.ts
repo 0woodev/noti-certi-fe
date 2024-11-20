@@ -29,3 +29,44 @@ export const getAppById = async (id: number) => {
         throw error;
     }
 }
+
+export const getAppsByDomainId = async (id: number, exclude?: boolean) => {
+    try {
+        let getAppsRes = await api.get(`/app/domain/${id}`);
+
+        return getAppsRes.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const getAppsByExcludeDomainId = async (id: number) => {
+    try {
+        let getAppsRes = await api.get(`/app/domain/exclude/${id}`);
+
+        return getAppsRes.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const connectAppsToDomain = async (domainId: number, appIds: number[]) => {
+    try {
+        let connectAppsRes = await api.put(`/app/domain/${domainId}`, null, { params: { appIds: appIds.toString() } });
+
+        return connectAppsRes.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const disconnectAppsToDomain = async (domainId: number, appIds: number[]) => {
+    try {
+        let disconnectAppsRes = await api.delete(`/app/domain/${domainId}`, { params: { appIds: appIds.toString() } });
+
+        return disconnectAppsRes.data;
+    } catch (error) {
+        throw error;
+    }
+}
+

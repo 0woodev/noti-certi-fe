@@ -5,9 +5,23 @@ import {getLiveCertificate, findManagedCertificate, connectDomainAndCert} from "
 import {useNavigate} from "react-router-dom";
 import {IDomain} from "../type/Domain";
 import {getDomainByIpAndPort, getDomainIp, saveDomain} from "../api/Domain";
+import AppTable from "../components/app/AppTable";
+import {IApp} from "../type/App";
+import {
+    connectAppsToDomain,
+    disconnectAppsToDomain,
+    getAppsByDomainId,
+    getAppsByExcludeDomainId,
+    searchApp
+} from "../api/App";
 
 
-const AddDomain = () => {
+interface AddDomainProps {
+    close: () => void;
+
+}
+
+const AddDomain = ({close}: AddDomainProps) => {
     const navigate = useNavigate();
     const [host, setHost] = useState<string>("");
     const [port, setPort] = useState<number>(443);
@@ -18,8 +32,17 @@ const AddDomain = () => {
     const [managedCertificate, setManagedCertificate] = useState<ICertificate | null>(null);
 
     const [isInitialized, setIsInitialized] = useState<boolean>(false);
+    const [step, setStep] = useState(0);
+    const [appSearchTableOpen, setAppSearchTableOpen] = useState(false);
 
-    const handleDomainChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const [notConnectedApps, setNotConnectedApps] = useState<IApp[]>([]);
+    const [connectedApps, setConnectedApps] = useState<IApp[]>([]);
+
+    const [selectedInConnectedApps, setSelectedInConnectedApps] = useState<boolean[]>([]);
+    const [selectedInNotConnectedApps, setSelectedInNotConnectedApps] = useState<boolean[]>([]);
+
+    const handleDomainChange = (e: React.ChangeEvent<HTMLInputElement
+    >) => {
         setHost(e.target.value);
     }
 
@@ -86,70 +109,265 @@ const AddDomain = () => {
         const connectedDomainRes = await connectDomainAndCert(savedDomain!.id);
         const connectedDomain = connectedDomainRes.data;
 
-        navigateToDomainDetail(connectedDomain.domain.id);
+        await getApps(savedDomain!.id);
+        const notConnectedAppRes = await getAppsByExcludeDomainId(savedDomain!.id);
+        setNotConnectedApps(notConnectedAppRes.data);
+
+        const connectedAppRes = await getAppsByDomainId(savedDomain!.id);
+        setConnectedApps(connectedAppRes.data);
+
+        setStep(prev => prev + 1);
+        // navigateToDomainDetail(connectedDomain.domain.id);
     }
 
     const navigateToDomainDetail = (domainId: number) => {
+
         navigate(`/domain/${domainId}`);
     }
 
     const handleNavigateDomainDetailButtonClick = async () => {
         if (domain !== null) {
-            navigateToDomainDetail(domain.id)
+            const notConnectedAppRes = await getAppsByExcludeDomainId(domain!.id);
+            setNotConnectedApps(notConnectedAppRes.data);
+
+            const connectedAppRes = await getAppsByDomainId(domain!.id);
+            setConnectedApps(connectedAppRes.data);
+
+            setStep(prev => prev + 1);
+            // navigateToDomainDetail(domain.id)
         } else {
             alert("도메인 정보가 없습니다!");
         }
     }
+
+    const DomainSearchAndSaveAndConnectToCertStep = () => {
+        return (
+            <>
+                <SearchBar>
+                    <DomainInput placeholder={"도메인 (ex - 127.0.0.1, www.naver.com)"} onChange={handleDomainChange} value={host}/>
+                    <PortInput placeholder={"포트 (ex - 443, 444)"} onChange={handlePortChange} value={port}/>
+                    <SearchButton onClick={handleSearchButtonClick}>조회</SearchButton>
+                </SearchBar>
+                {isInitialized && (
+                    <>
+                        {ip && (
+                            <Info>도메인 정보: {ip}</Info>
+                        )}
+                        {domain ? (
+                            <Managed>해당 도메인은 관리되고 있는 도메인입니다. :)</Managed>
+                        ) : (
+                            <NotManaged>해당 도메인은 관리되고 있지 않습니다. :(</NotManaged>
+                        )}
+                        {liveCertificate && (
+                            <CertificateJson value={JSON.stringify(liveCertificate, null, 2)} readOnly={true}/>
+                        )
+                        }
+                        {managedCertificate ? (
+                            <Managed>이 인증서는 관리 및 모니러팅 중에 있습니다 :)</Managed>
+                        ) : (
+                            <NotManaged>이 인증서는 관리되고 있지 않습니다 :(</NotManaged>
+                        )}
+                        {(domain && managedCertificate && domain.certificateId === managedCertificate.id) ? (
+                            <button onClick={handleNavigateDomainDetailButtonClick}>도메인 정보 보러가기</button>
+                        ) : (
+                            <button onClick={handleNavigateCertificateNewButtonClick}>인증서 저장하러 가기</button>
+                        )}
+
+                    </>
+                )}
+            </>
+        )
+    }
+
+    const getApps = async (domainId: number) => {
+        const connectedAppRes = await getAppsByDomainId(domainId);
+        setConnectedApps(connectedAppRes.data);
+        setSelectedInConnectedApps(new Array(connectedApps.length).fill(false));
+
+        const notConnectedAppRes = await getAppsByExcludeDomainId(domainId);
+        setNotConnectedApps(notConnectedAppRes.data);
+        setSelectedInNotConnectedApps(new Array(notConnectedApps.length).fill(false));
+    }
+
+    const handleConnectSelectedApp = async () => {
+        const selectedApps = selectedInNotConnectedApps
+            .map((x, i) => x ? notConnectedApps[i].id : -1)
+            .filter(x => x !== -1);
+
+        console.log("selected", selectedApps);
+
+        await connectAppsToDomain(domain!.id, selectedApps);
+        await getApps(domain!.id);
+    }
+    const handleDisconnectSelectedApp = async () => {
+        const selectedApps = selectedInConnectedApps
+            .map((x, i) => x ? connectedApps[i].id : -1)
+            .filter(x => x !== -1);
+
+
+
+        await disconnectAppsToDomain(domain!.id, selectedApps);
+        await getApps(domain!.id);
+    }
+
+    const DomainConnectToAppStep = () => {
+
+        return (
+            <>
+                <Info><Label>HOST</Label> {domain?.host}</Info>
+                <Info><Label>IP</Label> {domain?.ip}</Info>
+                <Info><Label>PORT</Label> {domain?.port}</Info>
+
+                <Info><Label>인증서 CA</Label> {managedCertificate?.issuingCA}</Info>
+                <Info><Label>발급일</Label> {managedCertificate?.validFrom}</Info>
+                <Info><Label>만료일</Label> {managedCertificate?.validTo}</Info>
+                <Info><Label>SN</Label> {managedCertificate?.serialNumber}</Info>
+                <Info><Label>회사</Label> {managedCertificate?.organization}</Info>
+                <Info>
+                    <Label>SANs</Label>
+                    {managedCertificate?.sans && managedCertificate.sans.length >= 2 ? (
+                        <Value>[{managedCertificate?.sans.slice(0, 2).join(", ")}, ...] 외 {managedCertificate.sans.length - 2}개</Value>
+                    ) : (
+                        <Value>SANs: {managedCertificate?.sans.join(", ")}</Value>
+                    )}
+                </Info>
+                <TableContainer>
+                    <Table>
+                        <AppTable
+                            apps={connectedApps}
+                            selectable={true}
+                            selected={selectedInConnectedApps}
+                            setSelected={setSelectedInConnectedApps}
+                            refresh={() => getApps(domain!.id)}
+                            newAppButtonHide={true}
+                            intro={"도메인과 연결된 앱"}
+                        />
+                    </Table>
+
+                    <MoveButtonContainer>
+                        <MoveButton onClick={handleConnectSelectedApp}>추가</MoveButton>
+                        <MoveButton onClick={handleDisconnectSelectedApp}>삭제</MoveButton>
+                    </MoveButtonContainer>
+                    <Table>
+                        <AppTable
+                            apps={notConnectedApps}
+                            selectable={true}
+                            selected={selectedInNotConnectedApps}
+                            setSelected={setSelectedInNotConnectedApps}
+                            refresh={() => getApps(domain!.id)}
+                            newAppButtonHide={true}
+                            intro={"연결되지 않은 앱"}
+                        />
+                    </Table>
+                </TableContainer>
+
+                <Button onClick={close}>완료</Button>
+            </>
+        )
+    }
+
     return (
         <PageLayout>
-            <Title>
-                지금 사용하고 있는 서비스의 인증서를 확인해보세요!
-            </Title>
-            <HelpGuide>
-                <div>128.128.128.128 형태의 IP 주소, 혹은 www.naver.com 같은 도메인 주소와</div>
-                <div>443, 80, 8080 과 같은 포트번호를 입력하시고 검색을 눌러주세요!</div>
-
-                <div>잠시만, 기다리시면 인증서 정보를 가져다 드릴게요!</div>
-            </HelpGuide>
-            <SearchBar>
-                <DomainInput placeholder={"도메인"} onChange={handleDomainChange} value={host}/>
-                <PortInput placeholder={"포트"} onChange={handlePortChange} value={port}/>
-                <SearchButton onClick={handleSearchButtonClick}>조회</SearchButton>
-            </SearchBar>
-            {isInitialized && (
-                <>
-                    {ip && (
-                        <Info>도메인 정보: {ip}</Info>
-                    )}
-                    {domain ? (
-                        <Managed>해당 도메인은 관리되고 있는 도메인입니다. :)</Managed>
-                    ) : (
-                        <NotManaged>해당 도메인은 관리되고 있지 않습니다. :(</NotManaged>
-                    )}
-                    {liveCertificate && (
-                        <CertificateJson value={JSON.stringify(liveCertificate, null, 2)} readOnly={true}/>
-                    )
-                    }
-                    {managedCertificate ? (
-                        <Managed>이 인증서는 관리 및 모니러팅 중에 있습니다 :)</Managed>
-                    ) : (
-                        <NotManaged>이 인증서는 관리되고 있지 않습니다 :(</NotManaged>
-                    )}
-                    {(domain && managedCertificate && domain.certificateId === managedCertificate.id) ? (
-                        <button onClick={handleNavigateDomainDetailButtonClick}>도메인 정보 보러가기</button>
-                    ) : (
-                        <button onClick={handleNavigateCertificateNewButtonClick}>인증서 저장하러 가기</button>
-                    )}
-
-                </>
-            )}
+            {step === 0 && DomainSearchAndSaveAndConnectToCertStep()}
+            {step === 1 && DomainConnectToAppStep()}
         </PageLayout>
     );
 };
 
+const Button = styled.button`
+    width: 5rem;
+    height: 3rem;
+    border-radius: 0.5rem;
+    background-color: lightgray;
+
+    &:hover {
+        background-color: gray;
+        color: white;
+        cursor: pointer;
+    }
+`;
+
+const MoveButtonContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 3rem;
+    height: 100%;
+
+    // 화면이 좁으면 위 아래 배치
+    @media (max-width: 1000px) {
+        flex-direction: row;
+        width: 100%;
+        height: 3rem;
+    }
+`;
+
+const MoveButton = styled.button`
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    background-color: lightgray;
+    margin: 0.5rem 0;
+    
+    &:hover {
+        background-color: gray;
+        color: white;
+        cursor: pointer;
+    }
+
+    @media (max-width: 1000px) {
+        flex-direction: row;
+        margin: 0 0.5rem;    
+        //transform: rotate(90deg);
+    }
+`;
+
+const TableContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 10rem;
+    width: 100%;
+    padding: 0.5rem;
+    
+    // 화면이 좁으면 위 아래 배치
+    @media (max-width: 1000px) {
+        flex-direction: column;
+    }
+`;
+
+const Table = styled.div`
+    padding: 10px;
+    width: 40%;
+    max-height: 100%;
+    overflow-y: auto;
+
+    // 화면이 좁으면 위 아래 배치
+    @media (max-width: 1000px) {
+        width: 100%;
+        height: fit-content;
+        max-height: 10rem;
+    }
+`;
+
 
 const Info = styled.div`
+    display: flex;
+    flex-direction: row;
+    padding: 0 1rem;
+    width: 30rem;
 `;
+
+const Label = styled.div`
+    font-weight: bold;
+    min-width: 25%;
+`;
+
+const Value = styled.div`
+`;
+
 
 const Managed = styled.div`
     color: green;
@@ -160,28 +378,17 @@ const NotManaged = styled.div`
 `;
 
 const PageLayout = styled.div`
+    padding: 1rem 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    background-color: #ad7a7a;
+    background-color: white;
     width: 100%;
     height: 100%;
 `;
 
-const Title = styled.h1`
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 2rem;
-`;
-
-const HelpGuide = styled.div`
-    font-size: 1rem;
-    margin-bottom: 1rem;
-`;
-
 const SearchBar = styled.div`
-    border: 1px solid black;
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
@@ -193,7 +400,7 @@ const SearchBar = styled.div`
 const Input = styled.input`
     height: 4rem;
     border-radius: 0.5rem;
-    border: 1px solid black;
+    border: 2px solid black;
     padding: 0 0.5rem;
 `;
 

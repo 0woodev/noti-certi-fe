@@ -3,6 +3,7 @@ import {useNavigate} from "react-router-dom";
 import styled from "styled-components";
 import {IApp} from "../type/App";
 import {saveApp, searchApp} from "../api/App";
+import AppTable from "../components/app/AppTable";
 
 
 const AppList = () => {
@@ -60,43 +61,29 @@ const AppList = () => {
         setAppDescription(e.target.value);
     }
 
+    const getApps = async () => {
+        try {
+            const res = await searchApp();
+            setApps(res.data);
+        } catch (error) {
+            alert("앱 정보를 불러오는데 실패했습니다");
+        }
+    }
+
     return (
         <>
-            <DomainListContainer>
-                <h1>App List {apps.length}개</h1>
-                <button onClick={handleOpenModalButtonClick}>앱 추가</button>
-                {apps.map((app) => (
-                    <Domain onClick={() => handleAppClick(app.id)}>
-                        <Info>
-                            <Label>앱 이름</Label><Value>{app.appName}</Value>
-                        </Info>
-                        <Info>
-                            <Label>앱 코드</Label><Value>{app.code}</Value>
-                        </Info>
-                        <Info>
-                            <Label>앱 설명</Label><Value>{app.description}</Value>
-                        </Info>
-                        <Info>
-                            <Label>팀</Label><Value>{app.teamId ? "O" : "X"}</Value>
-                        </Info>
-                    </Domain>
-                ))}
-            </DomainListContainer>
-            {modalOn && (
-                <AddAppModal>
-                    <Info>
-                        <Label>이름</Label><Input value={appName} onChange={handleAppNameChange}/>
-                    </Info>
-                    <Info>
-                        <Label>코드</Label><Input value={appCode} onChange={handleAppCodeChange}/>
-                    </Info>
-                    <Info>
-                        <Label>설명</Label><Input value={appDescription} onChange={handleAppDescriptionChange}/>
-                    </Info>
+            <PageLayout>
+                <AppTable
+                    apps={apps}
+                    refresh={getApps}
+                    newAppButtonHide={false}
+                    intro="NOTI CERTI 가 관리하는 앱 리스트"
+                    selectable={false}
+                    selected={[]}
+                    setSelected={() => {}}
+                />
+            </PageLayout>
 
-                    <button onClick={handleAddAppButtonClick} >추가</button>
-                </AddAppModal>
-            )}
         </>
     );
 }
@@ -114,6 +101,17 @@ const AddAppModal = styled.div`
     display: flex;
     flex-direction: column;
 `;
+
+const PageLayout = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+`;
+
+
 
 const DomainListContainer = styled.div`
     width: 100%;

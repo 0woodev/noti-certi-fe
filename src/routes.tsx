@@ -1,6 +1,5 @@
 import {Route, Routes} from "react-router-dom";
 import React from "react";
-import AddDomain from "./pages/AddDomain";
 import CertificateNew from "./pages/DomainDetail";
 import DomainDetail from "./pages/DomainDetail";
 import DomainList from "./pages/DomainList";
@@ -8,6 +7,7 @@ import AppList from "./pages/AppList";
 import AppDetail from "./pages/AppDetail";
 
 const BaseRouter = () => {
+
     return (
         <Routes>
             <Route path="/" element={<DomainList />} />

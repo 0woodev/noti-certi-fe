@@ -110,7 +110,7 @@ const DomainDetail = () => {
 
             <button onClick={() => navigate(-1)}>뒤로가기</button>
             <div>연결된 애플리케이션</div>
-            <ConnectedAppListContainer></ConnectedAppListContainer>
+            <ConnectedAppTableContainer></ConnectedAppTableContainer>
         </PageLayout>
     );
 }
@@ -123,7 +123,7 @@ const Label = styled.div`
 const Value = styled.div`
 `;
 
-const ConnectedAppListContainer = styled.div`
+const ConnectedAppTableContainer = styled.div`
     border: 1px solid black;
     width: 50%;
     min-height: 1rem; 

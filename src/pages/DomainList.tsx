@@ -63,8 +63,8 @@ const DomainList = () => {
                 ))}
             </DomainListContainer>
             {modalOn && (
-                <Modal close={() => setModalOn(false)}>
-                        <AddDomain />
+                <Modal close={() => setModalOn(false)} minWidth={"500px"} minHeight={"500px"}>
+                        <AddDomain close={() => setModalOn(false)}/>
                 </Modal>
             )}
         </PageLayout>
