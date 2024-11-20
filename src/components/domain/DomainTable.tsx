@@ -94,9 +94,10 @@ const DomainTable = ({ domains, newDomainButtonHide, intro, refresh, selected, s
                                 status = 0;
                             } else {
                                 dDay = Math.floor((expiredAt.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-                                if (expiredAt.getTime() < new Date().getTime()) {
+                                // if (expiredAt.getTime() < new Date().getTime()) {
+                                if (expiredAt.getTime() - new Date().getTime() < 1000 * 60 * 60 * 24 * 120) { // TODO 위의 조건문으로
                                     status = 0;
-                                } else if (expiredAt.getTime() - new Date().getTime() < 1000 * 60 * 60 * 24 * 150) {
+                                } else if (expiredAt.getTime() - new Date().getTime() < 1000 * 60 * 60 * 24 * 200) { // TODO 200 -> 30
                                     status = 1;
                                 }
                                 statusMessage = dDay + "일 남음";
