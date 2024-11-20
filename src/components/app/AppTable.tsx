@@ -45,7 +45,7 @@ const AppTable = ({ apps, newAppButtonHide, intro, refresh, selected, setSelecte
 
     const handleAddAppButtonClick = async () => {
         try {
-            const saveAppRes = await saveApp(appName, appCode, appDescription);
+            await saveApp(appName, appCode, appDescription);
             await refresh();
             setModalOn(false);
         } catch (error) {
@@ -78,7 +78,7 @@ const AppTable = ({ apps, newAppButtonHide, intro, refresh, selected, setSelecte
                     <Count>{apps.length}개</Count>
                 </TopBar>
 
-                <DomainHeader>
+                <AppHeader>
                     <Info>
                         <Label>앱 이름</Label>
                     </Info>
@@ -91,10 +91,10 @@ const AppTable = ({ apps, newAppButtonHide, intro, refresh, selected, setSelecte
                     <Info>
                         <Label>팀</Label>
                     </Info>
-                </DomainHeader>
+                </AppHeader>
                 <List>
                     {apps.map((app, i) => (
-                        <Domain onClick={() => handleAppClick(selectable ? i : app.id)} $selected={selected[i] ? "true" : "false"}>
+                        <App onClick={() => handleAppClick(selectable ? i : app.id)} $selected={selected[i] ? "true" : "false"}>
                             <Info>
                                 <Value>{app.appName ?? "-"}</Value>
                             </Info>
@@ -107,14 +107,14 @@ const AppTable = ({ apps, newAppButtonHide, intro, refresh, selected, setSelecte
                             <Info>
                                 <Value>{app.teamId ? "V" : "-"}</Value>
                             </Info>
-                        </Domain>
+                        </App>
                     ))}
                     {apps.length === 0 && (
-                        <Domain>
+                        <App>
                             <Info>
                                 <Value>앱이 없습니다.</Value>
                             </Info>
-                        </Domain>
+                        </App>
                     )}
                 </List>
 
@@ -207,7 +207,7 @@ const List = styled.div`
     height: 100%;
     overflow-y: auto;
 `;
-const Domain = styled.div<{ $selected?: string }>`
+const App = styled.div<{ $selected?: string }>`
     margin: 1px 0;
     border: 1px solid black;
     padding: 0 10px;
@@ -222,7 +222,7 @@ const Domain = styled.div<{ $selected?: string }>`
     `}
 `;
 
-const DomainHeader = styled(Domain)`
+const AppHeader = styled(App)`
     background: beige;
 `;
 

@@ -167,7 +167,7 @@ const AddDomain = ({close}: AddDomainProps) => {
                         ) : (
                             <NotManaged>이 인증서는 관리되고 있지 않습니다 :(</NotManaged>
                         )}
-                        {(domain && managedCertificate && domain.certificateId === managedCertificate.id) ? (
+                        {(domain && managedCertificate && domain.certificate?.id === managedCertificate.id) ? (
                             <button onClick={handleNavigateDomainDetailButtonClick}>도메인 정보 보러가기</button>
                         ) : (
                             <button onClick={handleNavigateCertificateNewButtonClick}>인증서 저장하러 가기</button>
@@ -255,7 +255,7 @@ const AddDomain = ({close}: AddDomainProps) => {
                             selected={selectedInNotConnectedApps}
                             setSelected={setSelectedInNotConnectedApps}
                             refresh={() => getApps(domain!.id)}
-                            newAppButtonHide={true}
+                            newAppButtonHide={false}
                             intro={"연결되지 않은 앱"}
                         />
                     </Table>
@@ -276,7 +276,7 @@ const AddDomain = ({close}: AddDomainProps) => {
 
 const Button = styled.button`
     width: 5rem;
-    height: 3rem;
+    min-height: 3rem;
     border-radius: 0.5rem;
     background-color: lightgray;
 
@@ -328,9 +328,9 @@ const TableContainer = styled.div`
     flex-direction: row;
     align-items: flex-start;
     justify-content: center;
-    min-height: 10rem;
+    min-height: 20rem;
     width: 100%;
-    padding: 0.5rem;
+    padding: 0 0.5rem;
     
     // 화면이 좁으면 위 아래 배치
     @media (max-width: 1000px) {
@@ -339,10 +339,11 @@ const TableContainer = styled.div`
 `;
 
 const Table = styled.div`
-    padding: 10px;
+    padding:  0 10px;
     width: 40%;
-    max-height: 100%;
-    overflow-y: auto;
+    overflow-y: hidden;
+    max-height: 25rem;
+    //border: 1px solid black;
 
     // 화면이 좁으면 위 아래 배치
     @media (max-width: 1000px) {

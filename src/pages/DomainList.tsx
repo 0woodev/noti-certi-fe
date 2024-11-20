@@ -5,6 +5,7 @@ import {useNavigate} from "react-router-dom";
 import styled from "styled-components";
 import AddDomain from "./AddDomain";
 import {Modal} from "../components/Modal";
+import DomainTable from "../components/domain/DomainTable";
 
 
 const DomainList = () => {
@@ -14,13 +15,7 @@ const DomainList = () => {
 
     useEffect(() => {
         // Fetch domains from API
-        searchDomain()
-            .then((res) => {
-                setDomains(res.data);
-            })
-            .catch((error) => {
-                alert("도메인 정보를 불러오는데 실패했습니다 - " + error.message);
-            })
+        getDomains();
 
     }, []);
 
@@ -33,40 +28,24 @@ const DomainList = () => {
         setModalOn(true);
     }
 
+    const getDomains = async () => {
+        try {
+            const res = await searchDomain();
+            setDomains(res.data);
+        } catch (error) {
+            alert("도메인 정보를 불러오는데 실패했습니다.");
+        }
+    }
 
     return (
         <PageLayout>
-            <TopBar>
-                <Intro>NOTI CERTI 가 관리하고 있는 도메인 수 {domains.length}개</Intro>
-                <AddButton onClick={handleAddDomainButtonClick}>도메인 추가</AddButton>
-            </TopBar>
-
-            <DomainListContainer>
-                {domains.map((domain) => (
-                    <Domain
-                        $valid={domain.certificateId ? "T" : "F"}
-                        onClick={() => handleDomainClick(domain.id)}
-                    >
-                        <Info>
-                            <Label>도메인 주소</Label><Value>{domain.host}</Value>
-                        </Info>
-                        <Info>
-                            <Label>도메인 IP</Label><Value>{domain.ip}</Value>
-                        </Info>
-                        <Info>
-                            <Label>도메인 포트</Label><Value>{domain.port}</Value>
-                        </Info>
-                        <Info>
-                            <Label>인증서</Label><Value>{domain.certificateId ? "O" : "X"}</Value>
-                        </Info>
-                    </Domain>
-                ))}
-            </DomainListContainer>
-            {modalOn && (
-                <Modal close={() => setModalOn(false)} minWidth={"500px"} minHeight={"500px"}>
-                        <AddDomain close={() => setModalOn(false)}/>
-                </Modal>
-            )}
+            <DomainTable
+                domains={domains}
+                refresh={getDomains}
+                selectable={false}
+                selected={[]}
+                setSelected={() => {}}
+                intro={"NOTI CERTI 가 관리하는 도메인"}/>
         </PageLayout>
     );
 }

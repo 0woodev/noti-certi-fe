@@ -1,11 +1,15 @@
 
-import {useNavigate, useParams} from "react-router-dom";
+import {replace, useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
-import styled from "styled-components";
-import {getAppById} from "../api/App";
-import {IApp} from "../type/App";
+import {findAllDomainsByAppId, getDomainById} from "../api/Domain";
 import {IDomain} from "../type/Domain";
-import {findAllDomainsByAppId} from "../api/Domain";
+import {ICertificate} from "../type/Certificate";
+import {connectDomainAndCert, getManagedCertificateById} from "../api/Certificate";
+import styled from "styled-components";
+import {getAppById, getAppsByDomainId} from "../api/App";
+import {IApp} from "../type/App";
+import AppTable from "../components/app/AppTable";
+import DomainTable from "../components/domain/DomainTable";
 
 
 const AppDetail = () => {
@@ -21,28 +25,34 @@ const AppDetail = () => {
             return;
         }
 
-        getAppById(Number(id))
-            .then((res) => {
-                setApp(res.data); // Assuming API returns domain in `res.data`
-            })
-            .catch(() => {
-                navigate("/404"); // Redirect to 404 if API call fails
-            });
+        getApp(Number(id));
     }, [id, navigate]);
 
     useEffect(() => {
-        if (app !== null) {
-            findAllDomainsByAppId(app.id)
-                .then((res) => {
-                    setDomains(res.data);
-                }).catch(() => {
-                    alert("도메인 정보를 불러오는데 실패했습니다.");
-                });
-        }
+        getDomains();
     }, [app]);
 
-    const handleDomainClick = (id: number) => {
-        navigate(`/domain/${id}`);
+    const getApp = async (appId: number) => {
+        try {
+            const getAppRes = await getAppById(appId);
+            const app = getAppRes.data;
+            setApp(app);
+        } catch (error) {
+            alert("도메인 정보를 불러오는데 실패했습니다.");
+            navigate("/", {replace: true});
+        }
+
+    }
+
+    const getDomains = async () => {
+        const appId = Number(id);
+        try {
+            const getDomainsRes = await findAllDomainsByAppId(appId);
+            const apps = getDomainsRes.data;
+            setDomains(apps);
+        } catch (error) {
+            alert("앱 정보를 불러오는데 실패했습니다.");
+        }
     }
 
     return (
@@ -61,35 +71,24 @@ const AppDetail = () => {
             </Info>
             <Info>
                 <Label>팀</Label>
-                <Value>{app?.teamId ? "O" : "X"}</Value>
+                <Value>{app?.teamId ? "O" : "-"}</Value>
             </Info>
 
-
             <button onClick={() => navigate(-1)}>뒤로가기</button>
-            <div>연결된 도메인</div>
-            <ConnectedDomainListContainer>
-                {
-                    domains.map((domain) => (
-                        <Domain onClick={() => handleDomainClick(domain.id)}>
-                            <Info>
-                                <Label>도메인 주소</Label><Value>{domain.host}</Value>
-                            </Info>
-                            <Info>
-                                <Label>도메인 IP</Label><Value>{domain.ip}</Value>
-                            </Info>
-                            <Info>
-                                <Label>도메인 포트</Label><Value>{domain.port}</Value>
-                            </Info>
-                            <Info>
-                                <Label>인증서</Label><Value>{domain.certificateId ? "O" : "X"}</Value>
-                            </Info>
-                        </Domain>
-                    ))
-                }
-            </ConnectedDomainListContainer>
+            <TableWrapper>
+                <DomainTable domains={domains} refresh={getDomains} newDomainButtonHide={true} selectable={false} selected={[]} setSelected={()=>{"연결된 도메인"}}/>
+            </TableWrapper>
         </PageLayout>
     );
 }
+
+const TableWrapper = styled.div`
+    width: 70%;
+    min-width: 50rem;
+    margin-top: 1rem;
+
+`;
+
 
 const Label = styled.div`
     font-weight: bold;
@@ -99,17 +98,10 @@ const Label = styled.div`
 const Value = styled.div`
 `;
 
-
-const Domain = styled.div`
-    border: 1px solid black;
-    padding: 10px;
-    width: 50%;
-    hieght: 10rem;
-`;
-const ConnectedDomainListContainer = styled.div`
+const ConnectedAppTableContainer = styled.div`
     border: 1px solid black;
     width: 50%;
-    min-height: 1rem; 
+    min-height: 1rem;
     margin-top: 1rem;
 `;
 
@@ -126,7 +118,6 @@ const PageLayout = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #ad7a7a;
     width: 100%;
     height: 100%;
 `;
@@ -134,7 +125,7 @@ const PageLayout = styled.div`
 const Info = styled.div`
     display: flex;
     flex-direction: row;
-    
+
     width: 50%;
 `;
 

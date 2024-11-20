@@ -10,3 +10,8 @@ export interface ICertificate {
     ip: string;
 }
 
+
+export interface ISimpleCertificate {
+    id: number;
+    validTo: string;
+}

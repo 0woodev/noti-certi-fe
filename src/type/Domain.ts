@@ -1,3 +1,5 @@
+import {ISimpleCertificate} from "./Certificate";
+
 export interface ISimpleDomain {
     id: number;
     host: string;
@@ -11,6 +13,7 @@ export interface IDomain {
     host: string;
     ip: string;
     port: string;
-    certificateId: number | null;
+    certificate: ISimpleCertificate | null;
 }
+
 

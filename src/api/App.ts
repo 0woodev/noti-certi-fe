@@ -30,7 +30,7 @@ export const getAppById = async (id: number) => {
     }
 }
 
-export const getAppsByDomainId = async (id: number, exclude?: boolean) => {
+export const getAppsByDomainId = async (id: number) => {
     try {
         let getAppsRes = await api.get(`/app/domain/${id}`);
 

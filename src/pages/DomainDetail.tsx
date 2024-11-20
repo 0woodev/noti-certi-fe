@@ -1,11 +1,14 @@
 
-import {useNavigate, useParams} from "react-router-dom";
+import {replace, useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {getDomainById} from "../api/Domain";
 import {IDomain} from "../type/Domain";
 import {ICertificate} from "../type/Certificate";
 import {connectDomainAndCert, getManagedCertificateById} from "../api/Certificate";
 import styled from "styled-components";
+import {getAppsByDomainId} from "../api/App";
+import {IApp} from "../type/App";
+import AppTable from "../components/app/AppTable";
 
 
 const DomainDetail = () => {
@@ -14,6 +17,7 @@ const DomainDetail = () => {
     const navigate = useNavigate();
     const [domain, setDomain] = useState<IDomain | null>(null);
     const [certificate, setCertificate] = useState<ICertificate | null>(null);
+    const [apps, setApps] = useState<IApp[]>([]);
 
     useEffect(() => {
         if (!id || isNaN(Number(id))) {
@@ -21,40 +25,37 @@ const DomainDetail = () => {
             return;
         }
 
-        getDomainById(Number(id))
-            .then((res) => {
-                setDomain(res.data); // Assuming API returns domain in `res.data`
-            })
-            .catch(() => {
-                navigate("/404"); // Redirect to 404 if API call fails
-            });
+        getDomain(Number(id));
     }, [id, navigate]);
 
     useEffect(() => {
-        if (domain !== null) {
-            if (!domain.certificateId) {
-                return;
-            }
-            const certificateId = domain.certificateId;
-            getManagedCertificateById(certificateId!)
-                .then((res) => {
-                    const certificate = res.data;
-                    setCertificate(certificate);
-                })
-        }
+        getCertificate();
+        getApps();
     }, [domain]);
+
+    const getDomain = async (domainId: number) => {
+        try {
+            const getDomainRes = await getDomainById(domainId);
+            const domain = getDomainRes.data;
+            setDomain(domain);
+        } catch (error) {
+            alert("도메인 정보를 불러오는데 실패했습니다.");
+            navigate("/", {replace: true});
+        }
+
+    }
 
     const getCertificate = async () => {
         if (domain === null) return;
 
         try {
-            if (domain.certificateId === null) {
+            if (domain.certificate?.id === null) {
                 const connectedRes = await connectDomainAndCert(domain.id);
                 const { certificate } = connectedRes.data;
 
                 setCertificate(certificate);
             } else {
-                const managedRes = await getManagedCertificateById(domain.certificateId);
+                const managedRes = await getManagedCertificateById(domain.certificate!.id);
                 const certificate = managedRes.data;
 
                 setCertificate(certificate);
@@ -62,6 +63,17 @@ const DomainDetail = () => {
 
         } catch (error) {
             alert("인증서 조회에 실패했습니다.")
+        }
+    }
+
+    const getApps = async () => {
+        const domainId = Number(id);
+        try {
+            const getAppsRes = await getAppsByDomainId(domainId);
+            const apps = getAppsRes.data;
+            setApps(apps);
+        } catch (error) {
+            alert("앱 정보를 불러오는데 실패했습니다.");
         }
     }
 
@@ -77,14 +89,7 @@ const DomainDetail = () => {
                 <Label>도메인 포트</Label><Value>{domain?.port}</Value>
             </Info>
 
-            <Info>
-                <Label>인증서 유무</Label>
-                {certificate ? (
-                    <Managed>O</Managed>
-                ) : (
-                    <Unmanaged>X</Unmanaged>
-                )}
-            </Info>
+            <br/>
             <Info>
                 <Label>인증서 SN</Label><Value>{certificate?.serialNumber}</Value>
             </Info>
@@ -109,11 +114,20 @@ const DomainDetail = () => {
 
 
             <button onClick={() => navigate(-1)}>뒤로가기</button>
-            <div>연결된 애플리케이션</div>
-            <ConnectedAppTableContainer></ConnectedAppTableContainer>
+            <TableWrapper>
+                <AppTable apps={apps} refresh={getApps} newAppButtonHide={true} selectable={false} selected={[]} setSelected={()=>{"연결된 앱"}}/>
+            </TableWrapper>
         </PageLayout>
     );
 }
+
+const TableWrapper = styled.div`
+    width: 70%;
+    min-width: 50rem;
+    margin-top: 1rem;
+    
+`;
+
 
 const Label = styled.div`
     font-weight: bold;
@@ -143,7 +157,6 @@ const PageLayout = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #ad7a7a;
     width: 100%;
     height: 100%;
 `;
