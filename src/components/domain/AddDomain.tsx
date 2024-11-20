@@ -140,12 +140,17 @@ const AddDomain = ({close}: AddDomainProps) => {
         }
     }
 
+    const handleEnterKeyUp = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            await handleSearchButtonClick();
+        }
+    }
     const DomainSearchAndSaveAndConnectToCertStep = () => {
         return (
             <>
                 <SearchBar>
-                    <DomainInput placeholder={"도메인 (ex - 127.0.0.1, www.naver.com)"} onChange={handleDomainChange} value={host}/>
-                    <PortInput placeholder={"포트 (ex - 443, 444)"} onChange={handlePortChange} value={port}/>
+                    <DomainInput placeholder={"도메인 (ex - 127.0.0.1, www.naver.com)"} onKeyUp={handleEnterKeyUp} onChange={handleDomainChange} value={host}/>
+                    <PortInput placeholder={"포트 (ex - 443, 444)"} onKeyUp={handleEnterKeyUp} onChange={handlePortChange} value={port}/>
                     <SearchButton onClick={handleSearchButtonClick}>조회</SearchButton>
                 </SearchBar>
                 {isInitialized && (

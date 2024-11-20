@@ -19,6 +19,7 @@ const DomainList = () => {
 
     }, []);
 
+
     const handleDomainClick = (id: number) => {
         navigate(`/domain/${id}`);
 

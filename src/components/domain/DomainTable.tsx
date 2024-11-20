@@ -50,6 +50,11 @@ const DomainTable = ({ domains, newDomainButtonHide, intro, refresh, selected, s
         setModalOn(true);
     }
 
+    const closeModal = async () => {
+        await refresh();
+        setModalOn(false);
+    }
+
     const getLight = (status: CertificateStatus) => {
         if (status === CertificateStatus.EXPIRED) {
             return <BlackLight />;
@@ -154,8 +159,8 @@ const DomainTable = ({ domains, newDomainButtonHide, intro, refresh, selected, s
                 </List>
             </DomainListContainer>
             {modalOn && (
-                <Modal close={() => setModalOn(false)} minWidth={"500px"} minHeight={"500px"}>
-                        <AddDomain close={() => setModalOn(false)}/>
+                <Modal close={closeModal} minWidth={"500px"} minHeight={"500px"}>
+                        <AddDomain close={closeModal}/>
                 </Modal>
             )}
         </>
