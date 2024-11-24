@@ -46,7 +46,7 @@ const DomainList = () => {
                 selectable={false}
                 selected={[]}
                 setSelected={() => {}}
-                intro={"NOTI CERTI 가 관리하는 도메인"}/>
+                intro={"도메인 리스트"}/>
         </PageLayout>
     );
 }

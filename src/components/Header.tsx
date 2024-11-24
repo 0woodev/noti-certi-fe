@@ -18,7 +18,8 @@ const Header: React.FC = () => {
     }
 
     const handleTeamButtonClick = () => {
-        navigate("/team");
+        alert("준비 중입니다!");
+        // navigate("/team");
     }
 
     return (
@@ -31,7 +32,7 @@ const Header: React.FC = () => {
                 </LogoText>
             </LogoContainer>
             <NavigatorWrapper>
-                <Navigator onClick={handleLogoButtonClick}>HOME</Navigator>
+                {/*<Navigator onClick={handleLogoButtonClick}>HOME</Navigator>*/}
                 <Navigator onClick={handleAppButtonClick}>APP</Navigator>
                 <Navigator onClick={handleDomainButtonClick}>DOMAIN</Navigator>
                 <Navigator onClick={handleTeamButtonClick}>TEAM</Navigator>

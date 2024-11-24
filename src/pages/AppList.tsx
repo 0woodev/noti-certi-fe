@@ -77,7 +77,7 @@ const AppList = () => {
                     apps={apps}
                     refresh={getApps}
                     newAppButtonHide={false}
-                    intro="NOTI CERTI 가 관리하는 앱 리스트"
+                    intro="앱 리스트"
                     selectable={false}
                     selected={[]}
                     setSelected={() => {}}

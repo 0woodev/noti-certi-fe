@@ -155,10 +155,13 @@ const AddAppModal = styled.div`
 `;
 
 
-const Intro = styled.div`
-    font-size: 1rem;
+const Intro = styled.h1`
+    font-size: 20px;
     flex-grow: 1;
     height: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
 `;
 
 const TopBar = styled.div`
@@ -176,6 +179,9 @@ const Count = styled.div`
     font-size: 1rem;
     height: 100%;
     margin-left: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `;
 
 
