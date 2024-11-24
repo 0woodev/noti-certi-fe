@@ -33,7 +33,7 @@ const DomainTable = ({ domains, newDomainButtonHide, intro, refresh, selected, s
         if (!selectable) {
             setSelected(domains.map(() => false));
         }
-    }, [domains]);
+    }, [domains, selectable, setSelected]);
 
     const handleDomainClick = (id: number) => {
         if (selectable) {
@@ -201,16 +201,6 @@ const YellowRight = styled(Light)`
     background: yellow;
 `;
 
-const AddDomainModal = styled.div`
-    border: 1px solid black;
-    width: 100%;
-    hieght: 100%;
-    display: flex;
-    background: white;
-    flex-direction: column;
-    padding: 1rem;
-`;
-
 
 const Intro = styled.h1`
     font-size: 20px;
@@ -308,7 +298,5 @@ const Label = styled.div`
 const Value = styled.div`
 `;
 
-const Input = styled.input`
-`;
 
 export default DomainTable;
