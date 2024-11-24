@@ -1,6 +1,5 @@
 import {useEffect, useState} from "react";
 import {IDomain} from "../../type/Domain";
-import {searchDomain} from "../../api/Domain";
 import {useNavigate} from "react-router-dom";
 import styled from "styled-components";
 import AddDomain from "../../components/domain/AddDomain";
